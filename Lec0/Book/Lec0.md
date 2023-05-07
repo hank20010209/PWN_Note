@@ -852,7 +852,7 @@ _start:                        ;程式起始點
 write:
 	mov eax, 4             ;把 System call 的編號存到 eax 暫存器中，編號 4 表示 write()
 	mov ebx, 1             ;把檔案描述子 (file descriptor) 儲存到 rbx 暫存器中，1 表示 stdout
-	pop ecx       
+	pop ecx                ;彈出 Stack 頂端的記憶體地址，該記憶體地址指向到 "Hello, World" 字串
 	mov edx, 14            ;把要輸出的字串長度儲存到 edx 暫存器中
 	int 0x80               ;呼叫 System call
 
