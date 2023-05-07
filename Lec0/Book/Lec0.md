@@ -344,19 +344,19 @@ $ gcc hello.o -o hello -static
 
 比較兩邊的 `main`，可以發現到記憶體地址改變了，且 function 的部份 `puts` 被填入了正確的記憶體地址。
 
-:::info
-思考: 為什麼編譯器會將 `printf` 優化成 `puts()` ?
-原因為 `printf` 需要處理許多的格式，包含 `%d, %c, %f, %s` 等等，而 `puts()` 只需要判斷 `\0` 出現在何處即可，做的判斷以及處理更少，因此執行時間也來的更好。
+>
+> 思考: 為什麼編譯器會將 `printf` 優化成 `puts()` ?
+> 原因為 `printf` 需要處理許多的格式，包含 `%d, %c, %f, %s` 等等，而 `puts()` 只> 需要判斷 `\0` 出現在何處即可，做的判斷以及處理更少，因此執行時間也來的更好。
+>
+> 延伸閱讀: [你所不知道的 C 語言：編譯器和最佳化原理篇](https://hackmd.io/@sysprog/c-compiler-optimization?type=view)
 
-延伸閱讀: [你所不知道的 C 語言：編譯器和最佳化原理篇](https://hackmd.io/@sysprog/c-compiler-optimization?type=view)
-:::
 `main` 改變了記憶體地址，意義上為重新定位，也就是 `main` 會被放置在記憶體中某一處。
 
 經過了重新定位以及填入了 function 的記憶體地址，整個程式就可以正常的載入到記憶體中執行了。
 
 接著，我們可以嘗試使用 `file` 檢視檔案資訊
 我們目前知道了程式是如何從原始碼變成一個執行檔，而執行檔載入從硬碟載入到記憶體中，我們需要在記憶體中放置程式的一些資訊，諸如 ... 以下先介紹段的概念
-## ==Lab1: Hello==
+## Lab1: Hello
 觀察 `hello.c` 的所有中間檔案
 
 
@@ -463,7 +463,7 @@ ELF 格式的檔案可以用於鍊結，通常一個 ELF 檔案我們可以把�
 值得注意的地方，我們這邊分割的概念和上方解讀 ELF 結構時的概念不同，這邊讀寫與執行的概念，是當程式被載入到記憶體時，才有的概念。
 
 以下我們通過簡單的程式碼來更加了解 ELF Section 的概念，考慮以下 C 語言程式碼
-## ==Lab2: ELF_Section==
+## Lab2: ELF_Section
 ```c
 #include <stdio.h>
 #include <stdlib.h>
@@ -620,12 +620,8 @@ Intel 風格
 ![](https://i.imgur.com/NB2lhXe.png)
 
 我們也可以使用工具 Cemu 幫助我們看到組合語言與機器語言之間的對應關係
-:::info
-善用工具，省的善加臆測~
 
-![](https://i.imgur.com/MmHVATb.png)
 
-:::
 ![](https://i.imgur.com/MHQsfIp.png)
 從上面可以看到 `mov ecx` 對應到的機器碼為 `0xb9`，`0x43` 對應到的 machine code 為 `43 00 00 00`，特別注意到 `0x43` 在記憶體中擺放的方式，這和 big endian 以及 little endian 有關，假設現在有一個變數 `x`，型別為 `int`，存在於記憶體地址 `0x100` 中，也就是 `&x = 0x100`，而假設一個 `int` 為 4 bytes (32 bit)，則變數 `x` 的 4 個位元組將被儲存在記憶體中 `0x100`, `0x101`, `0x102`, `0x103` 的位置。
 
@@ -755,11 +751,12 @@ all:
 在上面我們看到了一個函式的呼叫與其呼叫慣例，在一些情況中我們會使用到 stack 去管理函式的記憶體空間 (非 `malloc`)，區域變數，流程控制等等。stack 是一種資料結構，支援兩種操作，分別為 `push` 和 `pop`，且都是針對 stack 頂端進行操作，先進入的元素最後被彈出 stack，品課洋芋片一般。
 
 ![](https://i.imgur.com/TEiKRdE.jpg)
+[source](https://www.google.com/url?sa=i&url=https%3A%2F%2Ftwitter.com%2Fshaq%2Fstatus%2F966760779398762496%3Flang%3Dzh-Hant&psig=AOvVaw2jrbX12ZlPrpyjlsizyHrn&ust=1683525116851000&source=images&cd=vfe&ved=0CBEQjRxqFwoTCIicvPbB4v4CFQAAAAAdAAAAABAD)
 
 stack 的生長方向為記憶體高位向低位生長，`sp` 暫存器指向到 stack 的頂端，使用 `push`, `pop` 指令對 stack 進行操作
 
 如果我們要把資料放到 stack 上，我們需要使用 `push` 指令，舉例，假設我們想要把 `rax` 中的資料 `push` 到 stack 上，則圖像化為以下，搭配 cemu 進行實驗
-## ==Lab4: Cemu: Stack==
+## Lab4: Cemu: Stack
 ```asm
 mov rax, 0x1234567
 push rax
@@ -846,7 +843,7 @@ Binary Exploitation: 針對二進位檔案的相關漏洞利用
 ## 關於 Shellcode
 所謂 Shellcode，就是將機器碼全部串在一起，組成一連串 16 進位的程式碼，而通常對於一個程式注入程式碼主要目的是要得到 shell，因此稱作為 Shellcode，以下為一個 x86 組合語言寫成的 `Hello.s`
 
-## ==Lab5. Hello, Shellcode==
+## Lab5. Hello, Shellcode
 ```asm
 section .text      
 global _start
@@ -1030,7 +1027,7 @@ GDB 基礎指令
 
 ## 關於 gdb-peda 插件
 
-## ==Lab6. bomb phase_1 with GDB==
+## Lab6. bomb phase_1 with GDB
 提示: 在 `phase 1` 下中斷點，觀察程式邏輯。
 :::spoiler
 題目給定一個 `bomb.c` 檔案以及一個執行檔 `bomb.out`，我們先看到 `bomb.c`
@@ -1198,7 +1195,7 @@ IDA 為靜態分析工具，但是在 IDA 中也可以使用動態分析工具�
 - `F5`: 使用組合語言生成 C 語言
 - `Alt + t`: 尋找檔案中的字串
 - ...
-## ==Lab7. bomb phase_1 with IDA==
+## Lab7. bomb phase_1 with IDA
 方法1: 找到 `phase_1`，`F5` 反組譯之後就能夠得到解題資訊。
 
 方法2: 可以試著使用 `sudo` 權限執行 `ida`，可以使用 Local Linux Debugger 執行程式，在執行之前，可以對特定指令下中斷點，使用 `F2` 可以下中斷點
