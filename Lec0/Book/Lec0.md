@@ -1026,7 +1026,12 @@ GDB 基礎指令
 - `set disassembly-flavor intel`: 設定反組譯出來的組合語言為 intel 格式
 
 ## 關於 gdb-peda 插件
+- checksec: 檢查二進位檔案中開啟的保護機制
+- vmmap: 獲得 debug process 中虛擬記憶體空間資訊
+- readelf: 讀取 ELF Header
+- ...
 
+[source](https://github.com/longld/peda)
 ## Lab6. bomb phase_1 with GDB
 提示: 在 `phase 1` 下中斷點，觀察程式邏輯。
 :::spoiler
