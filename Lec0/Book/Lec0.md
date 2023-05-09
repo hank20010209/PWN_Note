@@ -1251,8 +1251,12 @@ IDA 為靜態分析工具，但是在 IDA 中也可以使用動態分析工具�
 
 ## 參考資訊
 [Binary Exploitation (Pwn) - Basic](https://www.youtube.com/watch?v=U8N6aE-Nq-Q)
+
 [PWN1](https://www.youtube.com/watch?v=EKe69LM26qA)
+
 [深入理解計算機系統, 3/e (Computer Systems: A Programmer's Perspective, 3/e)
-](https://www.tenlong.com.tw/products/9787111544937)[程序员的自我修养--链接、装载与库](https://www.books.com.tw/products/CN10136992)
+](https://www.tenlong.com.tw/products/9787111544937)
+
+[程序员的自我修养--链接、装载与库](https://www.books.com.tw/products/CN10136992)
 
 
