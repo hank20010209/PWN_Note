@@ -365,49 +365,39 @@ ELF (Executable and Linkable Format)，可執行與可鏈結格式，最初為 U
 
 以下為 `/usr/include/elf.h` 中部份內容
 ```c
-typedef Elf32_Half Elf32_Versym;                                                              │    1104:       80 3d 05 2f 00 00 00    cmp    BYTE PTR [rip+0x2f05],0x0        # 4010 <__TMC
-typedef Elf64_Half Elf64_Versym;                                                              │_END__>                                                    
-                                                                                              │    110b:       75 2b                   jne    1138 <__do_global_dtors_aux+0x38>
-                                                                                              │    110d:       55                      push   rbp
-/* The ELF file header.  This appears at the start of every ELF file.  */                     │    110e:       48 83 3d e2 2e 00 00    cmp    QWORD PTR [rip+0x2ee2],0x0        # 3ff8 <__cx
-                                                                                              │a_finalize@GLIBC_2.2.5>                                                 
-#define EI_NIDENT (16)                                                                        │    1115:       00                                         
-                                                                                              │    1116:       48 89 e5                mov    rbp,rsp
-typedef struct                                                                                │    1119:       74 0c                   je     1127 <__do_global_dtors_aux+0x27>
-{                                                                                             │    111b:       48 8b 3d e6 2e 00 00    mov    rdi,QWORD PTR [rip+0x2ee6]        # 4008 <__ds
-  unsigned char e_ident[EI_NIDENT];     /* Magic number and other info */                     │o_handle>                                      
-  Elf32_Half    e_type;                 /* Object file type */                                │    1122:       e8 19 ff ff ff          call   1040 <__cxa_finalize@plt>
-  Elf32_Half    e_machine;              /* Architecture */                                    │    1127:       e8 64 ff ff ff          call   1090 <deregister_tm_clones>
-  Elf32_Word    e_version;              /* Object file version */                             │    112c:       c6 05 dd 2e 00 00 01    mov    BYTE PTR [rip+0x2edd],0x1        # 4010 <__TMC
-  Elf32_Addr    e_entry;                /* Entry point virtual address */                     │_END__>                                                    
-  Elf32_Off     e_phoff;                /* Program header table file offset */                │    1133:       5d                      pop    rbp                   
-  Elf32_Off     e_shoff;                /* Section header table file offset */                │    1134:       c3                      ret       
-  Elf32_Word    e_flags;                /* Processor-specific flags */                        │    1135:       0f 1f 00                nop    DWORD PTR [rax]
-  Elf32_Half    e_ehsize;               /* ELF header size in bytes */                        │    1138:       c3                      ret           
-  Elf32_Half    e_phentsize;            /* Program header table entry size */                 │    1139:       0f 1f 80 00 00 00 00    nop    DWORD PTR [rax+0x0]
-  Elf32_Half    e_phnum;                /* Program header table entry count */                │                                                                                  
-  Elf32_Half    e_shentsize;            /* Section header table entry size */                 │0000000000001140 <frame_dummy>:
-  Elf32_Half    e_shnum;                /* Section header table entry count */                │    1140:       f3 0f 1e fa             endbr64            
-  Elf32_Half    e_shstrndx;             /* Section header string table index */               │    1144:       e9 77 ff ff ff          jmp    10c0 <register_tm_clones>
-} Elf32_Ehdr;                                                                                 │                                                                       
-                                                                                              │0000000000001149 <main>:                                   
-typedef struct                                                                                │    1149:       f3 0f 1e fa             endbr64            
-{                                                                                             │    114d:       55                      push   rbp         
-  unsigned char e_ident[EI_NIDENT];     /* Magic number and other info */                     │    114e:       48 89 e5                mov    rbp,rsp                                     
-  Elf64_Half    e_type;                 /* Object file type */                                │    1151:       48 8d 05 ac 0e 00 00    lea    rax,[rip+0xeac]        # 2004 <_IO_stdin_used+
-  Elf64_Half    e_machine;              /* Architecture */                                    │0x4>                                                       
-  Elf64_Word    e_version;              /* Object file version */                             │    1158:       48 89 c7                mov    rdi,rax                         
-  Elf64_Addr    e_entry;                /* Entry point virtual address */                     │    115b:       e8 f0 fe ff ff          call   1050 <puts@plt>
-  Elf64_Off     e_phoff;                /* Program header table file offset */                │    1160:       b8 00 00 00 00          mov    eax,0x0     
-  Elf64_Off     e_shoff;                /* Section header table file offset */                │    1165:       5d                      pop    rbp         
-  Elf64_Word    e_flags;                /* Processor-specific flags */                        │    1166:       c3                      ret                                    
-  Elf64_Half    e_ehsize;               /* ELF header size in bytes */                        │                                                           
-  Elf64_Half    e_phentsize;            /* Program header table entry size */                 │Disassembly of section .fini:                                     
-  Elf64_Half    e_phnum;                /* Program header table entry count */                │                                           
-  Elf64_Half    e_shentsize;            /* Section header table entry size */                 │0000000000001168 <_fini>:                                         
-  Elf64_Half    e_shnum;                /* Section header table entry count */                │    1168:       f3 0f 1e fa             endbr64 
-  Elf64_Half    e_shstrndx;             /* Section header string table index */               │    116c:       48 83 ec 08             sub    rsp,0x8
+typedef struct
+{
+  unsigned char e_ident[EI_NIDENT];     /* Magic number and other info */
+  Elf64_Half    e_type;                 /* Object file type */
+  Elf64_Half    e_machine;              /* Architecture */
+  Elf64_Word    e_version;              /* Object file version */
+  Elf64_Addr    e_entry;                /* Entry point virtual address */
+  Elf64_Off     e_phoff;                /* Program header table file offset */
+  Elf64_Off     e_shoff;                /* Section header table file offset */
+  Elf64_Word    e_flags;                /* Processor-specific flags */
+  Elf64_Half    e_ehsize;               /* ELF header size in bytes */
+  Elf64_Half    e_phentsize;            /* Program header table entry size */
+  Elf64_Half    e_phnum;                /* Program header table entry count */
+  Elf64_Half    e_shentsize;            /* Section header table entry size */
+  Elf64_Half    e_shnum;                /* Section header table entry count */
+  Elf64_Half    e_shstrndx;             /* Section header string table index */
 } Elf64_Ehdr;
+
+#define EI_MAG0         0               /* File identification byte 0 index */
+#define ELFMAG0         0x7f            /* Magic number byte 0 */
+
+#define EI_MAG1         1               /* File identification byte 1 index */
+#define ELFMAG1         'E'             /* Magic number byte 1 */
+
+#define EI_MAG2         2               /* File identification byte 2 index */
+#define ELFMAG2         'L'             /* Magic number byte 2 */
+
+#define EI_MAG3         3               /* File identification byte 3 index */
+#define ELFMAG3         'F'             /* Magic number byte 3 */
+
+/* Conglomeration of the identification bytes, for easy testing as a word.  */
+#define ELFMAG          "\177ELF"
+...
 ```
 
 ELF 本質上就是一個二進位檔案的格式，在 Linux 中使用 ELF，Windows 中為 PE，Binary 檔案開頭會有一個 magic number 的欄位，可以讓作業系統確認這是什麼類型的檔案，我們可以在上方 ELF 格式中看到 magic number 欄位的存在。
