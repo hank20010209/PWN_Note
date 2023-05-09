@@ -677,7 +677,7 @@ Intel 風格
 
 呼叫慣例會根據架構，作業系統，編譯器等等而有所不同。
 
-## ==Lab3: Calling Convention==
+## Lab3: Calling Convention
 我們可以通過實驗進行驗證，給定以下 C 語言原始碼檔案
 ```c
 #include <stdlib.h>
@@ -1056,7 +1056,7 @@ GDB 基礎指令
 [source](https://github.com/longld/peda)
 ## Lab6. bomb phase_1 with GDB
 提示: 在 `phase 1` 下中斷點，觀察程式邏輯。
-:::spoiler
+
 題目給定一個 `bomb.c` 檔案以及一個執行檔 `bomb.out`，我們先看到 `bomb.c`
 
 ```c
@@ -1212,7 +1212,7 @@ rsi            0x402400            0x402400
 $2 = 0x402400 "Border relations with Canada have never been better."
 ```
 只要我們輸入的字串為 `"Border relations with Canada have never been better."`，便可以通過 `phase_1`
-:::
+
 ## 靜態分析工具: IDA
 IDA 為反組譯器，可以用來分析 ELF, COFF, PE 等等格式的檔案，除了反組議之外，也能夠將反組譯的組合語言用來產生出虛擬的 C 語言程式碼方便閱讀。
 
@@ -1237,7 +1237,7 @@ IDA 為靜態分析工具，但是在 IDA 中也可以使用動態分析工具�
 ![](https://i.imgur.com/jMOBXcd.png)
 
 停在中斷點之後，我們可以通過 `F7` (步進函式執行) 或是 `F8` (步過函式執行)一行一行執行程式，觀察暫存器變化
-直接變更暫存器內容，通過本題~
+直接變更暫存器內容，通過 phase_1
 
 ## 參考資訊
 [Binary Exploitation (Pwn) - Basic](https://www.youtube.com/watch?v=U8N6aE-Nq-Q)
