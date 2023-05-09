@@ -3,7 +3,7 @@
 ## Outline
 - Source Code to Executable File
 - What is ELF
-- X86 Assembly and Calling Covension
+- X86 Assembly and Calling Convention
 - 靜態分析與動態分析
 - 動態分析: 使用 GDB 
 - 靜態分析: 使用 IDA
@@ -800,40 +800,72 @@ pop rbx
 ![](https://i.imgur.com/raEbtUy.png)
 
 接著我們通過實際案例觀察 prologue 和 epliogue 是如何分配 Stack Frame
-![](https://i.imgur.com/ZH4djga.png)
+![](https://hackmd.io/_uploads/rJcoG4w4h.png)
 
-在 prologue 部份，我們將 `rbp` 的值推入到 stack 中，接著 `rsp` 的值 -8，再將 `rsp` 的值設為 `rbp` 的值，因此 `rbp` 的值更新成新的 `rsp` 的值，舊的 `rbp` 的值位於 stack 中。
+在 prologue 部份，我們將 `rbp` 的值推入到 stack 中，接著 `rsp` 的值 -8。
+![](https://hackmd.io/_uploads/B1W7XVD42.png)
 
 ---
+再將 `rsp` 的值設為 `rbp` 的值，因此 `rbp` 的值更新成新的 `rsp` 的值，舊的 `rbp` 的值位於 stack 中，如下圖所示
+![](https://hackmd.io/_uploads/Byw0XVPNh.png)
 
-![](https://i.imgur.com/YatrKtk.png)
+
+---
 接著通過調整 `rsp`，開闢出一段給 `main` 函式使用的 stack 空間，可以在接下來函式主體中使用
 
+![](https://hackmd.io/_uploads/S1Mv4EDVn.png)
+
+
 -------
+經過中間 mov 操作，將函式需要的資料移入 stack，參數放置到暫存器後，接著我們看到 `call 0x1129 <func>`，`call` 會執行兩件事情，分別為 `push return address`，接著 `jmp func`。
+![](https://hackmd.io/_uploads/SyrRIEw4n.png)
 
-接著我們看到 `call 0x1129 <func>`，`call` 會執行兩件事情，分別為 `push return address`，接著 `jmp func`，下圖為 `call 0x1149 <func>` 之後的 stack 分佈情況
-![](https://i.imgur.com/V3K66vo.png)
-
----
-接著我們看到 `func` 的組合語言程式碼，並分析 stack 情況
-![](https://i.imgur.com/ESX21eG.png)
-
----
-分配 `func` 使用的 stack 空間
-![](https://i.imgur.com/S4hm0Lo.png)
+![](https://hackmd.io/_uploads/HJMa2VPN3.png)
 
 
-接著我們要執行 `leave`，`leave` 會 `mov rsp, rbp`，接著 `pop rbp`，因此在 `func` 執行完畢 `leave` 後，stack 為以下情況
-![](https://i.imgur.com/z7y3RtN.png)
-
-![](https://i.imgur.com/8jMFEma.png)
-
-![](https://i.imgur.com/9kuZIg8.png)
-
-這裡可以觀察到，在 `func` 執行完畢後，`rsp` 和 `rbp` 的位置又回到了我們在執行 `main` 函式的狀態。
+上面完成了 `push return address` 操作後，我們便 jmp 進入 `func` 
 
 ---
-接著我們跳回了 `main` 函式，依序執行 `leave`, `ret` 至此 stack 清空，程式執行完畢。
+接著我們看到 `func` 的組合語言程式碼
+![](https://hackmd.io/_uploads/SJcXT4DNh.png)
+
+---
+將 `rbp` 儲存到 stack 中，這個 `rbp` 原先指向到 `main` 的 base
+![](https://hackmd.io/_uploads/Hkq364vE3.png)
+
+---
+接著將 `rsp` 的值複製到 `rbp` 中
+![](https://hackmd.io/_uploads/BktH04PNn.png)
+
+---
+接著通過調整 `rsp` 的值，在 stack 中開闢一段空間給 `func` 使用
+![](https://hackmd.io/_uploads/r1UU1SPN3.png)
+
+---
+
+接著我們要執行 `leave`，`leave` 會 `mov rsp, rbp`，接著 `pop rbp`。
+![](https://hackmd.io/_uploads/B1-1grDV2.png)
+
+![](https://hackmd.io/_uploads/HJAzgrwV3.png)
+
+![](https://hackmd.io/_uploads/rkhIbSvEn.png)
+
+
+---
+接著是 `ret`，作用為 `pop rip`，這邊對應的意義為將 `return address` 放置到儲存 instruction pointer 的暫存器，對應到圖上的意義，就是改變紅色框框的位置，執行完畢後，我們便跳回到 `main` 函式中，紅色框框的位置在 `ret` 時設定完畢。
+
+![](https://hackmd.io/_uploads/rJPhzrPEh.png)
+
+---
+接著我們跳回了 `main` 函式，依序執行 `leave`, `ret`。
+
+![](https://hackmd.io/_uploads/Bk1EmBwE2.png)
+
+![](https://hackmd.io/_uploads/HkqvmHvVh.png)
+
+![](https://hackmd.io/_uploads/ryOCQrDN3.png)
+
+到這裡整個函式呼叫流程結束。
 ## 關於 Exploitation
 在上面的 Stack Frame 分析中我們看到函式跳轉是通過 return address 進行控制，如果我們在逆向的過程中，發現到程式碼中的漏洞，讓我們可以改變程式的執行流程，像是修改程式的 return address，那麼我們就稱之為 Exploitation，又稱作為 PWN。
 
@@ -1222,3 +1254,5 @@ IDA 為靜態分析工具，但是在 IDA 中也可以使用動態分析工具�
 [PWN1](https://www.youtube.com/watch?v=EKe69LM26qA)
 [深入理解計算機系統, 3/e (Computer Systems: A Programmer's Perspective, 3/e)
 ](https://www.tenlong.com.tw/products/9787111544937)[程序员的自我修养--链接、装载与库](https://www.books.com.tw/products/CN10136992)
+
+
