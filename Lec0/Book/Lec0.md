@@ -820,7 +820,7 @@ pop rbx
 ![](https://hackmd.io/_uploads/SJcXT4DNh.png)
 
 ---
-將 `rbp` 儲存到 stack 中，這個 `rbp` 原先指向到 `main` 的 base
+將 `rbp` 儲存到 stack 中，這個 `rbp` 原先指向到 `main` 的 base，從這裡可以發現到一件事情，`rbp` 指向到的為相對於目前，舊的 `rbp` 位置，我們現在位於 `func` 函適中，`rbp` 指向到 `main` 函式的 `rbp`。 
 ![](https://hackmd.io/_uploads/Hkq364vE3.png)
 
 ---
