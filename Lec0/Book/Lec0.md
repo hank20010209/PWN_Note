@@ -766,7 +766,7 @@ pop rbx
 
 
 ### Stack Frame
-定義: `esp` 到函式參數的範圍稱為某一個函式的 Stack Frame
+定義: `esp` 到函式參數的範圍稱為某一個函式的 Stack Frame，具體為 esp 到 ebp 的範圍
 
 我們可以通過上方反組譯出來的 64 位元程式看到 Stack Frame 的運作機制
 ```
